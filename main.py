@@ -122,8 +122,8 @@ def monitor():
         '4': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=4&sport=soccer', 'name': '🇸🇪 Svenska\nFrågor & Svar [Q&A]'},
         '90': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=90&sport=soccer', 'name': '🇹🇷 Türkçe\nManagerZone muhabbetleri [MZ Talk]'},
         '91': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=91&sport=soccer', 'name': '🇹🇷 Türkçe\nSorular & Cevaplar [Q&A]'},
-        '9': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=9&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English\n 🏴󠁧󠁢󠁥󠁮󠁧󠁿\nTransfers & Market'},
-        '249': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=249&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica) 🇦🇷\n    Mercado de Jugadores'}
+        '9': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=9&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English 🏴󠁧󠁢󠁥󠁮󠁧󠁿\n     Transfers & Market'},
+        '249': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=249&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica) 🇦🇷\n     Mercado de Jugadores'}
     }
 
     prev = load_state()
@@ -146,8 +146,8 @@ def monitor():
             for t in new_topics:
                 # construir mensagem com título, fórum, url e timestamp
                 timestamp = datetime.now(ZoneInfo("Europe/Lisbon")).strftime('%d/%m/%Y %H:%M')
-                msg = (f" <b>{f_info['name']}</b>\n\n"
-                       f"🔗\n <a href='{t['url']}'>{t['title']}</a>\n\n"  # Título do tópico clicável
+                msg = (f"<b>{f_info['name']}</b>\n\n"
+                       f"<a href='{t['url']}'>{t['title']}</a>\n\n"  # Título do tópico clicável
                        f"🕐 {timestamp}")
                 send_telegram_message(token, chat_id, msg)
                 time.sleep(3)  # evitar enviar todos ao mesmo tempo
