@@ -1,19 +1,16 @@
 #!/usr/bin/env python3
-import requests
-import json
-import os
+import requests, json, os, time, hashlib, logging
 from datetime import datetime
 from bs4 import BeautifulSoup
-import logging
-import time
-import hashlib
+from flask import Flask
+from threading import Thread
 
-# Configuração de logging
+# ---------------- CONFIG LOGGING ----------------
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# ---------------- TELEGRAM ----------------
 def send_telegram_message(token, chat_id, message):
-    """Envia mensagem para o Telegram"""
     try:
         url = f"https://api.telegram.org/bot{token}/sendMessage"
         data = {
@@ -22,128 +19,66 @@ def send_telegram_message(token, chat_id, message):
             'parse_mode': 'HTML',
             'disable_web_page_preview': True
         }
-        response = requests.post(url, data=data, timeout=10)
-        return response.json().get('ok', False)
+        requests.post(url, data=data, timeout=10)
     except Exception as e:
         logger.error(f"Erro Telegram: {e}")
-        return False
 
-def get_forum_topics(url, max_retries=2):
-    """Busca APENAS os tópicos principais de um fórum (não respostas)"""
-    for attempt in range(max_retries):
-        try:
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'pt-PT,pt;q=0.9,en;q=0.8',
-                'Connection': 'keep-alive',
-                'Upgrade-Insecure-Requests': '1'
-            }
-            response = requests.get(url, headers=headers, timeout=25)
-
-            if response.status_code != 200:
-                logger.error(f"HTTP {response.status_code} para {url}")
-                if attempt < max_retries - 1:
-                    time.sleep(2)
-                    continue
-                return []
-
-            soup = BeautifulSoup(response.text, 'html.parser')
-            topics = []
-
-            topic_links = soup.find_all('a', href=lambda x: x and ('topic_id=' in x or 'thread_id=' in x))
-
-            if not topic_links:
-                all_links = soup.find_all('a', href=True)
-                topic_links = [
-                    link for link in all_links
-                    if ('topic' in link.get('href').lower() or 'thread' in link.get('href').lower())
-                    and len(link.get_text(strip=True)) > 10
-                ]
-
-            seen_titles = set()
-
-            for link in topic_links:
-                try:
-                    title = link.get_text(strip=True)
-                    href = link.get('href', '')
-
-                    if (len(title) < 5 or
-                        title.lower() in ['ver', 'reply', 'responder', 'last post', 'último post', 'view', 'read'] or
-                        'javascript:' in href or
-                        '#' in href or
-                        title in seen_titles or
-                        any(word in title.lower() for word in ['page', 'página', 'next', 'previous', 'anterior', 'seguinte'])):
-                        continue
-
-                    if href.startswith('?'):
-                        full_url = f"https://www.managerzone.com/{href}"
-                    elif href.startswith('/'):
-                        full_url = f"https://www.managerzone.com{href}"
-                    elif not href.startswith('http'):
-                        continue
-                    else:
-                        full_url = href
-
-                    unique_string = f"{title}|{full_url}"
-                    topic_id = hashlib.md5(unique_string.encode()).hexdigest()[:12]
-
-                    topics.append({
-                        'id': topic_id,
-                        'title': title.strip()[:120],
-                        'url': full_url
-                    })
-
-                    seen_titles.add(title)
-
-                    if len(topics) >= 8:
-                        break
-
-                except Exception as e:
-                    logger.debug(f"Erro ao processar link: {e}")
-                    continue
-
-            logger.info(f"✅ Encontrados {len(topics)} tópicos únicos")
-            return topics
-
-        except Exception as e:
-            logger.error(f"❌ Erro ao acessar fórum (tentativa {attempt + 1}): {e}")
-            if attempt < max_retries - 1:
-                time.sleep(3)
-            continue
-
-    return []
-
-def load_state():
-    """Carrega estado anterior"""
+# ---------------- FORUM SCRAPER ----------------
+def get_forum_topics(url):
     try:
-        if os.path.exists('forum_state.json'):
-            with open('forum_state.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                logger.info(f"📂 Estado carregado: {len(data)} fóruns")
-                return data
+        headers = {
+            'User-Agent': 'Mozilla/5.0',
+            'Accept-Language': 'pt-PT,pt;q=0.9,en;q=0.8'
+        }
+        res = requests.get(url, headers=headers, timeout=25)
+        if res.status_code != 200:
+            return []
+
+        soup = BeautifulSoup(res.text, 'html.parser')
+        links = soup.find_all('a', href=lambda x: x and ('topic_id=' in x or 'thread_id=' in x))
+        topics, seen = [], set()
+
+        for link in links:
+            title = link.get_text(strip=True)
+            href = link.get('href', '')
+            if len(title) < 5 or '#' in href or title in seen:
+                continue
+
+            if href.startswith('?'):
+                full_url = "https://www.managerzone.com/" + href
+            elif href.startswith('/'):
+                full_url = "https://www.managerzone.com" + href
+            else:
+                full_url = href
+
+            topic_id = hashlib.md5(f"{title}|{full_url}".encode()).hexdigest()[:12]
+            topics.append({'id': topic_id, 'title': title[:120], 'url': full_url})
+            seen.add(title)
+            if len(topics) >= 8: break
+
+        return topics
     except Exception as e:
-        logger.error(f"Erro ao carregar estado: {e}")
+        logger.error(f"Erro ao buscar tópicos: {e}")
+        return []
+
+# ---------------- ESTADO ----------------
+def load_state():
+    if os.path.exists('forum_state.json'):
+        with open('forum_state.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
     return {}
 
 def save_state(state):
-    """Salva estado atual"""
-    try:
-        with open('forum_state.json', 'w', encoding='utf-8') as f:
-            json.dump(state, f, indent=2, ensure_ascii=False)
-        logger.info("💾 Estado salvo com sucesso")
-    except Exception as e:
-        logger.error(f"Erro ao salvar estado: {e}")
+    with open('forum_state.json', 'w', encoding='utf-8') as f:
+        json.dump(state, f, indent=2, ensure_ascii=False)
 
-def main():
+# ---------------- LOOP PRINCIPAL ----------------
+def monitor():
     token = os.getenv('TELEGRAM_TOKEN')
     chat_id = os.getenv('CHAT_ID')
-
     if not token or not chat_id:
-        logger.error("❌ TELEGRAM_TOKEN e CHAT_ID são obrigatórios!")
+        logger.error("❌ Faltam variáveis TELEGRAM_TOKEN e CHAT_ID")
         return
-
-    logger.info("🤖 Iniciando Monitor ManagerZone Expandido...")
 
     forums = {
         '125': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=125&sport=soccer','name': 'Português(Portugal) » Discussão Geral'},
@@ -166,50 +101,41 @@ def main():
         '4': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=4&sport=soccer','name': 'Svenska » Landslag Diskussion'},
         '90': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=90&sport=soccer','name': 'Nederlands » Algemene ManagerZone Discussie'},
         '91': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=91&sport=soccer','name': 'Nederlands » Nationale Teams'},
-        '9': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=9&sport=soccer','name': 'English » Crew Announcements'},
-        '249': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=249&sport=soccer','name': 'Español(Latinoamerica) » Crew Announcements'}
+        '9': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=9&sport=soccer','name': 'English » Transfers & Market'},
+        '249': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=249&sport=soccer','name': 'Español(Latinoamerica) » Mercado de Jugadores'}
     }
 
-    previous_state = load_state()
-    current_state = {}
+    prev = load_state()
+    curr = {}
+    is_first = len(prev) == 0
 
-    is_first_run = len(previous_state) == 0
-    total_new_topics = 0
+    if is_first:
+        send_telegram_message(token, chat_id, "🚀 Monitor ManagerZone iniciado!")
 
-    if is_first_run:
-        msg = "🚀 <b>Monitor ManagerZone Expandido Iniciado!</b>\n\n"
-        msg += f"📍 <b>Monitorando {len(forums)} fóruns</b>\n"
-        msg += "🔔 <i>Apenas novos tópicos serão notificados</i>\n"
-        msg += f"⏰ {datetime.now().strftime('%d/%m/%Y %H:%M')}"
-        send_telegram_message(token, chat_id, msg)
-
-    for i, (forum_id, forum_info) in enumerate(forums.items()):
-        logger.info(f"🔍 ({i+1}/{len(forums)}) Verificando: {forum_info['name']}")
-        if i > 0:
-            time.sleep(2)
-
-        current_topics = get_forum_topics(forum_info['url'])
-        if not current_topics:
-            current_state[forum_id] = previous_state.get(forum_id, [])
-            continue
-
-        current_state[forum_id] = current_topics
-        previous_topics = previous_state.get(forum_id, [])
-        previous_ids = {t['id'] for t in previous_topics}
-        new_topics = [t for t in current_topics if t['id'] not in previous_ids]
-
-        for topic in new_topics:
-            msg = f"🆕 <b>Novo tópico em {forum_info['name']}</b>\n\n"
-            msg += f"📝 <b>{topic['title']}</b>\n\n"
-            msg += f"🔗 <a href='{topic['url']}'>Ver tópico</a>\n"
-            msg += f"🕐 {datetime.now().strftime('%d/%m/%Y %H:%M')}"
-            if send_telegram_message(token, chat_id, msg):
-                logger.info(f"✅ Notificação enviada: {topic['title'][:50]}...")
-                total_new_topics += 1
+    for f_id, f_info in forums.items():
+        topics = get_forum_topics(f_info['url'])
+        curr[f_id] = [t['id'] for t in topics]
+        if not is_first:
+            new = [t for t in topics if t['id'] not in prev.get(f_id, [])]
+            for t in new:
+                msg = f"🆕 <b>Novo tópico em {f_info['name']}</b>\n\n"
+                msg += f"📝 <b>{t['title']}</b>\n🔗 {t['url']}"
+                send_telegram_message(token, chat_id, msg)
                 time.sleep(3)
+    save_state(curr)
 
-    save_state(current_state)
-    logger.info(f"✅ Concluído - {total_new_topics} novos tópicos detectados")
+# ---------------- SERVIDOR FLASK PARA O RENDER ----------------
+app = Flask(__name__)
+@app.route("/")
+def home():
+    return "ManagerZone Monitor Online ✅"
+
+def run_server():
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
 
 if __name__ == "__main__":
-    main()
+    Thread(target=run_server).start()
+    while True:
+        monitor()
+        logger.info("⏳ A aguardar 10 minutos...")
+        time.sleep(600)
