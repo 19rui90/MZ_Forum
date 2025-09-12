@@ -122,8 +122,8 @@ def monitor():
         '4': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=4&sport=soccer', 'name': '🇸🇪 Svenska\nFrågor & Svar [Q&A]'},
         '90': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=90&sport=soccer', 'name': '🇹🇷 Türkçe\nManagerZone muhabbetleri [MZ Talk]'},
         '91': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=91&sport=soccer', 'name': '🇹🇷 Türkçe\nSorular & Cevaplar [Q&A]'},
-        '9': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=9&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English\n  Transfers & Market'},
-        '249': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=249&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica)\n  Mercado de Jugadores 🇦🇷'}
+        '9': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=9&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English\n 🏴󠁧󠁢󠁥󠁮󠁧󠁿\nTransfers & Market'},
+        '249': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=249&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica) 🇦🇷\n    Mercado de Jugadores'}
     }
 
     prev = load_state()
@@ -132,7 +132,7 @@ def monitor():
 
     if is_first:
         # Só envia esta mensagem uma vez, no primeiro monitoramento
-        send_telegram_message(token, chat_id, "🚀 Monitor ManagerZone iniciado! \nPrimeira verificação — sem notificações anteriores.")
+        send_telegram_message(token, chat_id, "🚀🚀🚀\nMonitor ManagerZone iniciado! \nPrimeira verificação...\nSem notificações anteriores.")
         logger.info("Primeira execução: estado inicial carregado.")
 
     for f_id, f_info in forums.items():
