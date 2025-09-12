@@ -107,10 +107,8 @@ def monitor():
         '10': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=10&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English » ManagerZone Talk'},
         '12': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=12&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English » Questions & Answers'},
         '387': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=387&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English » Simulator Development Feedback'},
-        '318': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=318&sport=soccer', 'name': '🇨🇳 Chinese » 1 新手及疑问解答
-Newbie and Q&A'},
-        '316': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=316&sport=soccer', 'name': '🇨🇳 Chinese » 2 游戏热点以及官方杯赛讨论
-MZ Talk'},  # corrigi acentuação?
+        '318': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=318&sport=soccer', 'name': '🇨🇳 Chinese » 1 新手及疑问解答 Newbie and Q&A'},
+        '316': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=316&sport=soccer', 'name': '🇨🇳 Chinese » 2 游戏热点以及官方杯赛讨论 MZ Talk'},  # corrigi acentuação?
         '19': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=19&sport=soccer', 'name': '🇪🇦 Español(España) » ManagerZone habla'},
         '21': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=21&sport=soccer', 'name': '🇪🇦 Español(España) » Preguntas y Respuestas'},
         '26': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=26&sport=soccer', 'name': '🇵🇱 Polski » Rozmowy ManagerZone [MZ Talk]'},
