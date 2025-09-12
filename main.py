@@ -97,28 +97,30 @@ def monitor():
         return
 
     forums = {
-        '125': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=125&sport=soccer', 'name': 'Português(Portugal) » Discussão Geral'},
-        '126': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=126&sport=soccer', 'name': 'Português(Portugal) » Discussão sobre as Selecções Nacionais'},
-        '388': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=388&sport=soccer', 'name': 'Português(Portugal) » Outros Desportos'},
-        '47': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=47&sport=soccer', 'name': 'Deutsch » Allgemeine ManagerZone Diskussion'},
-        '49': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=49&sport=soccer', 'name': 'Deutsch » Nationalmannschaft Diskussion'},
-        '253': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=253&sport=soccer', 'name': 'Español(Latinoamerica) » ManagerZone Habla'},
-        '255': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=255&sport=soccer', 'name': 'Español(Latinoamerica) » Selecciones Nacionales'},
-        '10': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=10&sport=soccer', 'name': 'English » ManagerZone Talk'},
-        '12': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=12&sport=soccer', 'name': 'English » National Teams Discussion'},
-        '387': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=387&sport=soccer', 'name': 'English » Other Sports'},
-        '318': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=318&sport=soccer', 'name': 'Türkçe » ManagerZone Konuşmaları'},
-        '316': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=316&sport=soccer', 'name': 'Türkçe » Milli Takım Tartışações'},  # corrigi acentuação?
-        '19': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=19&sport=soccer', 'name': 'Français » Discussion Générale ManagerZone'},
-        '21': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=21&sport=soccer', 'name': 'Français » Équipes Nationales'},
-        '26': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=26&sport=soccer', 'name': 'Italiano » Discussione Generale ManagerZone'},
-        '25': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=25&sport=soccer', 'name': 'Italiano » Squadre Nazionali'},
-        '1': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=1&sport=soccer', 'name': 'Svenska » Allmänt om ManagerZone'},
-        '4': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=4&sport=soccer', 'name': 'Svenska » Landslag Diskussion'},
-        '90': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=90&sport=soccer', 'name': 'Nederlands » Algemene ManagerZone Discussie'},
-        '91': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=91&sport=soccer', 'name': 'Nederlands » Nationale Teams'},
-        '9': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=9&sport=soccer', 'name': 'English » Transfers & Market'},
-        '249': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=249&sport=soccer', 'name': 'Español(Latinoamerica) » Mercado de Jugadores'}
+        '125': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=125&sport=soccer', 'name': '🇵🇹 Português(Portugal) » ManagerZone Talk'},
+        '126': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=126&sport=soccer', 'name': '🇵🇹 Português(Portugal) »'Português(Portugal) » Perguntas e Respostas'},
+        '388': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=388&sport=soccer', 'name': '🇵🇹 Português(Portugal) » Discussão sobre as Selecções Nacionais'},
+        '47': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=47&sport=soccer', 'name': '🇧🇷 Português(Brasil) » ManagerZone talk'},
+        '49': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=49&sport=soccer', 'name': '🇧🇷 Português(Brasil) » Perguntas & Respostas'},
+        '253': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=253&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica) » ManagerZone Habla'},
+        '255': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=255&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica) » Preguntas y Respuestas'},
+        '10': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=10&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English » ManagerZone Talk'},
+        '12': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=12&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English » Questions & Answers'},
+        '387': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=387&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English » Simulator Development Feedback'},
+        '318': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=318&sport=soccer', 'name': '🇨🇳 Chinese » 1 新手及疑问解答
+Newbie and Q&A'},
+        '316': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=316&sport=soccer', 'name': '🇨🇳 Chinese » 2 游戏热点以及官方杯赛讨论
+MZ Talk'},  # corrigi acentuação?
+        '19': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=19&sport=soccer', 'name': '🇪🇦 Español(España) » ManagerZone habla'},
+        '21': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=21&sport=soccer', 'name': '🇪🇦 Español(España) » Preguntas y Respuestas'},
+        '26': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=26&sport=soccer', 'name': '🇵🇱 Polski » Rozmowy ManagerZone [MZ Talk]'},
+        '25': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=25&sport=soccer', 'name': '🇵🇱 Polski » Pytania i Odpowiedzi [Q&A]'},
+        '1': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=1&sport=soccer', 'name': '🇸🇪 Svenska » Allmänt om ManagerZone [MZ Talk]'},
+        '4': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=4&sport=soccer', 'name': '🇸🇪 Svenska » Frågor & Svar [Q&A]'},
+        '90': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=90&sport=soccer', 'name': '🇹🇷 Türkçe » ManagerZone muhabbetleri [MZ Talk]'},
+        '91': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=91&sport=soccer', 'name': '🇹🇷 Türkçe » Sorular & Cevaplar [Q&A]'},
+        '9': {'url': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 https://www.managerzone.com/?p=forum&sub=topics&forum_id=9&sport=soccer', 'name': 'English » Transfers & Market'},
+        '249': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=249&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica) » Mercado de Jugadores'}
     }
 
     prev = load_state()
