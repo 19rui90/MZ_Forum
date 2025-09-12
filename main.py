@@ -98,7 +98,7 @@ def monitor():
 
     forums = {
         '125': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=125&sport=soccer', 'name': '🇵🇹 Português(Portugal) » ManagerZone Talk'},
-        '126': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=126&sport=soccer', 'name': '🇵🇹 Português(Portugal) »'Português(Portugal) » Perguntas e Respostas'},
+        '126': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=126&sport=soccer', 'name': '🇵🇹 Português(Portugal) » Perguntas e Respostas'},
         '388': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=388&sport=soccer', 'name': '🇵🇹 Português(Portugal) » Discussão sobre as Selecções Nacionais'},
         '47': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=47&sport=soccer', 'name': '🇧🇷 Português(Brasil) » ManagerZone talk'},
         '49': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=49&sport=soccer', 'name': '🇧🇷 Português(Brasil) » Perguntas & Respostas'},
