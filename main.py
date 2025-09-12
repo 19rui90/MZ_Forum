@@ -5,6 +5,12 @@ from bs4 import BeautifulSoup
 from flask import Flask
 from threading import Thread
 
+from zoneinfo import ZoneInfo  # Python 3.9+
+
+# Fuso horário de Lisboa
+now = datetime.now(ZoneInfo("Europe/Lisbon"))
+timestamp = now.strftime("%d/%m/%Y %H:%M")
+
 # ---------------- CONFIG LOGGING ----------------
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
