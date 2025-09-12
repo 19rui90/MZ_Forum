@@ -28,89 +28,95 @@ def send_telegram_message(token, chat_id, message):
         logger.error(f"Erro Telegram: {e}")
         return False
 
-def get_forum_topics(url):
+def get_forum_topics(url, max_retries=2):
     """Busca APENAS os tópicos principais de um fórum (não respostas)"""
-    try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'pt-PT,pt;q=0.9,en;q=0.8',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1'
-        }
-        
-        logger.info(f"Verificando fórum: {url}")
-        response = requests.get(url, headers=headers, timeout=20)
-        
-        if response.status_code != 200:
-            logger.error(f"HTTP {response.status_code} para {url}")
-            return []
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
-        topics = []
-        
-        # Procura especificamente por tópicos na estrutura do ManagerZone
-        # Foca nos elementos que contêm tópicos principais (não posts/respostas)
-        topic_links = soup.find_all('a', href=lambda x: x and ('topic_id=' in x or 'thread_id=' in x))
-        
-        if not topic_links:
-            # Fallback: procura por links que parecem ser tópicos
-            all_links = soup.find_all('a', href=True)
-            topic_links = [link for link in all_links 
-                          if link.get('href') and ('topic' in link.get('href').lower() or 'thread' in link.get('href').lower())
-                          and len(link.get_text(strip=True)) > 10]  # Títulos com pelo menos 10 caracteres
-        
-        seen_titles = set()
-        
-        for link in topic_links:
-            try:
-                title = link.get_text(strip=True)
-                href = link.get('href', '')
-                
-                # Filtros para garantir que é um tópico principal
-                if (len(title) < 5 or  # Título muito curto
-                    title.lower() in ['ver', 'reply', 'responder', 'last post', 'último post'] or  # Links de ação
-                    'javascript:' in href or  # Links JavaScript
-                    '#' in href or  # Links para âncoras na mesma página
-                    title in seen_titles):  # Títulos duplicados
+    for attempt in range(max_retries):
+        try:
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'pt-PT,pt;q=0.9,en;q=0.8',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1'
+            }
+            
+            response = requests.get(url, headers=headers, timeout=25)
+            
+            if response.status_code != 200:
+                logger.error(f"HTTP {response.status_code} para {url}")
+                if attempt < max_retries - 1:
+                    time.sleep(2)
                     continue
-                
-                # Constrói URL completa
-                if href.startswith('?'):
-                    full_url = f"https://www.managerzone.com/{href}"
-                elif href.startswith('/'):
-                    full_url = f"https://www.managerzone.com{href}"
-                elif not href.startswith('http'):
-                    continue  # Ignora URLs inválidas
-                else:
-                    full_url = href
-                
-                # Cria ID único baseado no título e URL
-                unique_string = f"{title}|{full_url}"
-                topic_id = hashlib.md5(unique_string.encode()).hexdigest()[:12]
-                
-                topics.append({
-                    'id': topic_id,
-                    'title': title.strip()[:120],  # Limita título
-                    'url': full_url
-                })
-                
-                seen_titles.add(title)
-                
-                # Máximo 10 tópicos por fórum para evitar spam
-                if len(topics) >= 10:
-                    break
+                return []
+            
+            soup = BeautifulSoup(response.text, 'html.parser')
+            topics = []
+            
+            # Procura especificamente por tópicos na estrutura do ManagerZone
+            topic_links = soup.find_all('a', href=lambda x: x and ('topic_id=' in x or 'thread_id=' in x))
+            
+            if not topic_links:
+                # Fallback: procura por links que parecem ser tópicos
+                all_links = soup.find_all('a', href=True)
+                topic_links = [link for link in all_links 
+                              if link.get('href') and ('topic' in link.get('href').lower() or 'thread' in link.get('href').lower())
+                              and len(link.get_text(strip=True)) > 10]
+            
+            seen_titles = set()
+            
+            for link in topic_links:
+                try:
+                    title = link.get_text(strip=True)
+                    href = link.get('href', '')
                     
-            except Exception as e:
-                logger.debug(f"Erro ao processar link: {e}")
-                continue
-        
-        logger.info(f"✅ Encontrados {len(topics)} tópicos únicos")
-        return topics
-        
-    except Exception as e:
-        logger.error(f"❌ Erro ao acessar fórum: {e}")
-        return []
+                    # Filtros para garantir que é um tópico principal
+                    if (len(title) < 5 or
+                        title.lower() in ['ver', 'reply', 'responder', 'last post', 'último post', 'view', 'read'] or
+                        'javascript:' in href or
+                        '#' in href or
+                        title in seen_titles or
+                        any(word in title.lower() for word in ['page', 'página', 'next', 'previous', 'anterior', 'seguinte'])):
+                        continue
+                    
+                    # Constrói URL completa
+                    if href.startswith('?'):
+                        full_url = f"https://www.managerzone.com/{href}"
+                    elif href.startswith('/'):
+                        full_url = f"https://www.managerzone.com{href}"
+                    elif not href.startswith('http'):
+                        continue
+                    else:
+                        full_url = href
+                    
+                    # Cria ID único baseado no título e URL
+                    unique_string = f"{title}|{full_url}"
+                    topic_id = hashlib.md5(unique_string.encode()).hexdigest()[:12]
+                    
+                    topics.append({
+                        'id': topic_id,
+                        'title': title.strip()[:120],
+                        'url': full_url
+                    })
+                    
+                    seen_titles.add(title)
+                    
+                    if len(topics) >= 8:  # Máximo 8 tópicos por fórum
+                        break
+                        
+                except Exception as e:
+                    logger.debug(f"Erro ao processar link: {e}")
+                    continue
+            
+            logger.info(f"✅ Encontrados {len(topics)} tópicos únicos")
+            return topics
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao acessar fórum (tentativa {attempt + 1}): {e}")
+            if attempt < max_retries - 1:
+                time.sleep(3)
+            continue
+    
+    return []
 
 def load_state():
     """Carrega estado anterior"""
@@ -143,10 +149,11 @@ def main():
         logger.error("❌ TELEGRAM_TOKEN e CHAT_ID são obrigatórios!")
         return
     
-    logger.info("🤖 Iniciando Monitor ManagerZone...")
+    logger.info("🤖 Iniciando Monitor ManagerZone Expandido...")
     
-    # Configuração dos fóruns com nomes corretos
+    # Configuração completa dos fóruns com nomes baseados na estrutura típica do MZ
     forums = {
+        # Fóruns Portugueses Existentes
         '125': {
             'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=125&sport=soccer',
             'name': 'Português(Portugal) » Discussão Geral'
@@ -158,6 +165,76 @@ def main():
         '388': {
             'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=388&sport=soccer',
             'name': 'Português(Portugal) » Outros Desportos'
+        },
+        
+        # Novos Fóruns Adicionados
+        '47': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=47&sport=soccer',
+            'name': 'Deutsch » Allgemeine ManagerZone Diskussion'
+        },
+        '49': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=49&sport=soccer',
+            'name': 'Deutsch » Nationalmannschaft Diskussion'
+        },
+        '253': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=253&sport=soccer',
+            'name': 'Español(Latinoamerica) » ManagerZone Habla'
+        },
+        '255': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=255&sport=soccer',
+            'name': 'Español(Latinoamerica) » Selecciones Nacionales'
+        },
+        '10': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=10&sport=soccer',
+            'name': 'English » ManagerZone Talk'
+        },
+        '12': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=12&sport=soccer',
+            'name': 'English » National Teams Discussion'
+        },
+        '387': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=387&sport=soccer',
+            'name': 'English » Other Sports'
+        },
+        '318': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=318&sport=soccer',
+            'name': 'Türkçe » ManagerZone Konuşmaları'
+        },
+        '316': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=316&sport=soccer',
+            'name': 'Türkçe » Milli Takım Tartışmaları'
+        },
+        '19': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=19&sport=soccer',
+            'name': 'Français » Discussion Générale ManagerZone'
+        },
+        '21': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=21&sport=soccer',
+            'name': 'Français » Équipes Nationales'
+        },
+        '26': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=26&sport=soccer',
+            'name': 'Italiano » Discussione Generale ManagerZone'
+        },
+        '25': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=25&sport=soccer',
+            'name': 'Italiano » Squadre Nazionali'
+        },
+        '1': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=1&sport=soccer',
+            'name': 'Svenska » Allmänt om ManagerZone'
+        },
+        '4': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=4&sport=soccer',
+            'name': 'Svenska » Landslag Diskussion'
+        },
+        '90': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=90&sport=soccer',
+            'name': 'Nederlands » Algemene ManagerZone Discussie'
+        },
+        '91': {
+            'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=91&sport=soccer',
+            'name': 'Nederlands » Nationale Teams'
         }
     }
     
@@ -168,23 +245,35 @@ def main():
     # Verifica se é primeira execução
     is_first_run = len(previous_state) == 0
     total_new_topics = 0
+    forums_checked = 0
+    forums_failed = 0
     
     # Mensagem de inicialização (apenas na primeira vez)
     if is_first_run:
-        msg = "🚀 <b>Monitor ManagerZone Iniciado!</b>\n\n"
-        msg += "📍 <b>Monitorando:</b>\n"
-        msg += "• Discussão Geral\n"
-        msg += "• Selecções Nacionais\n" 
-        msg += "• Outros Desportos\n\n"
+        msg = "🚀 <b>Monitor ManagerZone Expandido Iniciado!</b>\n\n"
+        msg += f"📍 <b>Monitorando {len(forums)} fóruns:</b>\n"
+        msg += "• Português (Portugal)\n"
+        msg += "• English\n"
+        msg += "• Deutsch\n"
+        msg += "• Español (Latinoamérica)\n"
+        msg += "• Français\n"
+        msg += "• Italiano\n"
+        msg += "• Svenska\n"
+        msg += "• Nederlands\n"
+        msg += "• Türkçe\n\n"
         msg += "🔔 <i>Apenas novos tópicos serão notificados</i>\n"
         msg += f"⏰ {datetime.now().strftime('%d/%m/%Y %H:%M')}"
         
         if send_telegram_message(token, chat_id, msg):
             logger.info("📱 Mensagem de inicialização enviada")
     
-    # Verifica cada fórum
-    for forum_id, forum_info in forums.items():
-        logger.info(f"🔍 Verificando: {forum_info['name']}")
+    # Verifica cada fórum com pausa entre requests
+    for i, (forum_id, forum_info) in enumerate(forums.items()):
+        logger.info(f"🔍 ({i+1}/{len(forums)}) Verificando: {forum_info['name']}")
+        
+        # Pausa entre requests para evitar sobrecarga
+        if i > 0:
+            time.sleep(2)
         
         current_topics = get_forum_topics(forum_info['url'])
         
@@ -192,7 +281,10 @@ def main():
             logger.warning(f"⚠️  Nenhum tópico encontrado em {forum_info['name']}")
             # Mantém estado anterior se não conseguir buscar
             current_state[forum_id] = previous_state.get(forum_id, [])
+            forums_failed += 1
             continue
+        
+        forums_checked += 1
         
         # IDs dos tópicos atuais
         current_topic_ids = [topic['id'] for topic in current_topics]
@@ -222,7 +314,7 @@ def main():
                     else:
                         logger.error(f"❌ Falha ao enviar: {topic['title'][:50]}...")
             else:
-                logger.info(f"📋 Nenhum tópico novo em {forum_info['name']}")
+                logger.debug(f"📋 Nenhum tópico novo em {forum_info['name']}")
         else:
             logger.info(f"📋 Primeira execução - {len(current_topics)} tópicos registrados")
     
@@ -231,9 +323,12 @@ def main():
     
     # Log final
     if is_first_run:
-        logger.info("🎯 Primeira execução concluída - baseline estabelecido")
+        logger.info(f"🎯 Primeira execução concluída - baseline estabelecido para {forums_checked} fóruns")
+        if forums_failed > 0:
+            logger.warning(f"⚠️  {forums_failed} fóruns não puderam ser acessados")
     else:
         logger.info(f"✅ Verificação concluída - {total_new_topics} novos tópicos encontrados")
+        logger.info(f"📊 Estatísticas: {forums_checked} fóruns verificados, {forums_failed} falharam")
         
         if total_new_topics == 0:
             logger.info("📝 Nenhum novo tópico nos fóruns monitorados")
