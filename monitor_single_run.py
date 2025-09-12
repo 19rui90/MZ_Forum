@@ -136,8 +136,8 @@ def save_state(state):
         logger.error(f"Erro ao salvar estado: {e}")
 
 def main():
-    token = os.getenv('TELEGRAM_TOKEN')
-    chat_id = os.getenv('CHAT_ID')
+    token = os.getenv('8157004409:AAEm_d_ov9fDd5eUMKGFUURbEnR-jHzpxLg')
+    chat_id = os.getenv('919180273')
 
     if not token or not chat_id:
         logger.error("❌ TELEGRAM_TOKEN e CHAT_ID são obrigatórios!")
