@@ -1,0 +1,5 @@
+# Ignorar ficheiros de cache e base de dados local
+__pycache__/
+*.pyc
+forum_state.json
+.env
