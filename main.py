@@ -9,7 +9,6 @@ from zoneinfo import ZoneInfo  # Python 3.9+
 
 # Fuso horário de Lisboa
 now = datetime.now(ZoneInfo("Europe/Lisbon"))
-timestamp = now.strftime("%d/%m/%Y %H:%M")
 
 # ---------------- CONFIG LOGGING ----------------
 logging.basicConfig(level=logging.INFO,
@@ -133,7 +132,7 @@ def monitor():
 
     if is_first:
         # Só envia esta mensagem uma vez, no primeiro monitoramento
-        send_telegram_message(token, chat_id, "🚀 Monitor ManagerZone iniciado! \\nPrimeira verificação — sem notificações anteriores.")
+        send_telegram_message(token, chat_id, "🚀 Monitor ManagerZone iniciado! \nPrimeira verificação — sem notificações anteriores.")
         logger.info("Primeira execução: estado inicial carregado.")
 
     for f_id, f_info in forums.items():
@@ -148,8 +147,7 @@ def monitor():
                 # construir mensagem com título, fórum, url e timestamp
                 timestamp = datetime.now().strftime('%d/%m/%Y %H:%M')
                 msg = (f" <b>{f_info['name']}</b>\n\n"
-                       f"📝 <b>{t['title']}</b>\n"
-                       f"🔗 {t['url']}\n"
+                       f"🔗 <a href='{t['url']}'>{t['title']}</a>\n\n"  # Título do tópico clicável
                        f"🕐 {timestamp}")
                 send_telegram_message(token, chat_id, msg)
                 time.sleep(3)  # evitar enviar todos ao mesmo tempo
