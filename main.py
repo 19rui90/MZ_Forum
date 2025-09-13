@@ -120,8 +120,10 @@ def monitor():
         '4': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=4&sport=soccer', 'name': '🇸🇪 Svenska\nFrågor & Svar [Q&A]'},
         '90': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=90&sport=soccer', 'name': '🇹🇷 Türkçe\nManagerZone muhabbetleri [MZ Talk]'},
         '91': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=91&sport=soccer', 'name': '🇹🇷 Türkçe\nSorular & Cevaplar [Q&A]'},
-        '9': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=9&sport=soccer', 'name': '🏴 English 🏴\nTransfers & Market'},
-        '249': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=249&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica)\nMercado de Jugadores'}
+        '65': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=65&sport=soccer', 'name': '🇷🇴Romanian\nVorbe despre ManagerZone [MZ Talk]'},
+        '63': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=63&sport=soccer', 'name': '🇷🇴Romanian\nIntrebari si Raspunsuri [Q&A]'},
+        '102': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=102&sport=soccer', 'name': '🇮🇹Italiano\nChiacchiere su ManagerZone [MZ Talk]'},
+        '105': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=105&sport=soccer', 'name': '🇮🇹Italiano\nDomande e Risposte [Q&A]'}
     }
 
     prev = load_state()
@@ -140,7 +142,7 @@ def monitor():
             new_topics = [t for t in topics if t['id'] not in prev.get(f_id, [])]
             for t in new_topics:
                 msg = (f"<b>{f_info['name']}</b>\n\n"
-                       f"<a href='{t['url']}'>{t['title']}</a>")
+                       f"<a href='{t['url']}'>{t['title']}</a>\n\n ")
                 send_telegram_message(token, chat_id, msg)
                 time.sleep(2)
 
