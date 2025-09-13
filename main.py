@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-import requests, json, os, time, hashlib, logging
+import requests, json, os, time, hashlib, logging, re
 from datetime import datetime
 from bs4 import BeautifulSoup
 from flask import Flask
 from threading import Thread
-
-from zoneinfo import ZoneInfo  # Python 3.9+
-
-# Fuso horário de Lisboa
-now = datetime.now(ZoneInfo("Europe/Lisbon"))
+from zoneinfo import ZoneInfo
 
 # ---------------- CONFIG LOGGING ----------------
 logging.basicConfig(level=logging.INFO,
@@ -34,10 +30,7 @@ def send_telegram_message(token, chat_id, message):
 # ---------------- FORUM SCRAPER ----------------
 def get_forum_topics(url):
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0',
-            'Accept-Language': 'pt-PT,pt;q=0.9,en;q=0.8'
-        }
+        headers = {'User-Agent': 'Mozilla/5.0', 'Accept-Language': 'pt-PT,pt;q=0.9,en;q=0.8'}
         res = requests.get(url, headers=headers, timeout=25)
         if res.status_code != 200:
             logger.warning(f"HTTP {res.status_code} para {url}")
@@ -51,6 +44,12 @@ def get_forum_topics(url):
             href = link.get('href', '')
             if len(title) < 5 or '#' in href or title in seen:
                 continue
+            # extrair topic_id real
+            match = re.search(r'(?:topic_id|thread_id)=(\d+)', href)
+            if not match:
+                continue
+            topic_id = match.group(1)
+
             # montar URL completa
             if href.startswith('?'):
                 full_url = "https://www.managerzone.com/" + href
@@ -58,11 +57,10 @@ def get_forum_topics(url):
                 full_url = "https://www.managerzone.com" + href
             else:
                 full_url = href
-            # id único
-            topic_id = hashlib.md5(f"{title}|{full_url}".encode()).hexdigest()[:12]
+
             topics.append({'id': topic_id, 'title': title[:120], 'url': full_url})
             seen.add(title)
-            if len(topics) >= 8:
+            if len(topics) >= 20:
                 break
         logger.info(f"Encontrados {len(topics)} tópicos em {url}")
         return topics
@@ -109,11 +107,11 @@ def monitor():
         '49': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=49&sport=soccer', 'name': '🇧🇷 Português(Brasil)\nPerguntas & Respostas'},
         '253': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=253&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica)\nManagerZone Habla'},
         '255': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=255&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica)\nPreguntas y Respuestas'},
-        '10': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=10&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English\nManagerZone Talk'},
-        '12': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=12&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English\nQuestions & Answers'},
-        '387': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=387&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English\nSimulator Development Feedback'},
+        '10': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=10&sport=soccer', 'name': '🏴 English\nManagerZone Talk'},
+        '12': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=12&sport=soccer', 'name': '🏴 English\nQuestions & Answers'},
+        '387': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=387&sport=soccer', 'name': '🏴 English\nSimulator Development Feedback'},
         '318': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=318&sport=soccer', 'name': '🇨🇳 Chinese\n1 新手及疑问解答 Newbie and Q&A'},
-        '316': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=316&sport=soccer', 'name': '🇨🇳 Chinese\n2 游戏热点以及官方杯赛讨论 MZ Talk'},  # corrigi acentuação?
+        '316': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=316&sport=soccer', 'name': '🇨🇳 Chinese\n2 游戏热点以及官方杯赛讨论 MZ Talk'},
         '19': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=19&sport=soccer', 'name': '🇪🇦 Español(España)\nManagerZone habla'},
         '21': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=21&sport=soccer', 'name': '🇪🇦 Español(España)\nPreguntas y Respuestas'},
         '26': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=26&sport=soccer', 'name': '🇵🇱 Polski\nRozmowy ManagerZone [MZ Talk]'},
@@ -122,8 +120,8 @@ def monitor():
         '4': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=4&sport=soccer', 'name': '🇸🇪 Svenska\nFrågor & Svar [Q&A]'},
         '90': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=90&sport=soccer', 'name': '🇹🇷 Türkçe\nManagerZone muhabbetleri [MZ Talk]'},
         '91': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=91&sport=soccer', 'name': '🇹🇷 Türkçe\nSorular & Cevaplar [Q&A]'},
-        '9': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=9&sport=soccer', 'name': '🏴󠁧󠁢󠁥󠁮󠁧󠁿 English 🏴󠁧󠁢󠁥󠁮󠁧󠁿\n     Transfers & Market'},
-        '249': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=249&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica) 🇦🇷\n      Mercado de Jugadores'}
+        '9': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=9&sport=soccer', 'name': '🏴 English 🏴\nTransfers & Market'},
+        '249': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=249&sport=soccer', 'name': '🇦🇷 Español(Latinoamerica)\nMercado de Jugadores'}
     }
 
     prev = load_state()
@@ -131,8 +129,7 @@ def monitor():
     is_first = len(prev) == 0
 
     if is_first:
-        # Só envia esta mensagem uma vez, no primeiro monitoramento
-        send_telegram_message(token, chat_id, "🚀🚀🚀\nMonitor ManagerZone iniciado! \nPrimeira verificação...\nSem notificações anteriores.")
+        send_telegram_message(token, chat_id, "🚀 Monitor ManagerZone iniciado! (primeira execução)")
         logger.info("Primeira execução: estado inicial carregado.")
 
     for f_id, f_info in forums.items():
@@ -141,21 +138,15 @@ def monitor():
 
         if not is_first:
             new_topics = [t for t in topics if t['id'] not in prev.get(f_id, [])]
-            if new_topics:
-                logger.info(f"{len(new_topics)} novos tópicos no fórum {f_info['name']}")
             for t in new_topics:
-                # construir mensagem com título, fórum, url e timestamp
-                timestamp = datetime.now(ZoneInfo("Europe/Lisbon")).strftime('%d/%m/%Y %H:%M')
                 msg = (f"<b>{f_info['name']}</b>\n\n"
-                       f"<a href='{t['url']}'>{t['title']}</a>\n\n"  # Título do tópico clicável
-                       f"")
-#                       f"🕐 {timestamp}")
+                       f"<a href='{t['url']}'>{t['title']}</a>")
                 send_telegram_message(token, chat_id, msg)
-                time.sleep(3)  # evitar enviar todos ao mesmo tempo
+                time.sleep(2)
 
     save_state(curr)
 
-# ---------------- SERVIDOR FLASK (necessário no Render) ----------------
+# ---------------- SERVIDOR FLASK ----------------
 app = Flask(__name__)
 
 @app.route("/")
@@ -167,10 +158,7 @@ def run_server():
     app.run(host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
-    # iniciar servidor web em thread separada
     Thread(target=run_server).start()
-
-    # loop contínuo: executar o monitor a cada 5 minutos
     while True:
         try:
             monitor()
