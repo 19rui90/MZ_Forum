@@ -112,18 +112,22 @@ def monitor():
         '387': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=387&sport=soccer', 'name': '🏴 English\n      Simulator Development Feedback'},
         '316': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=316&sport=soccer', 'name': '🇨🇳 Chinese\n      2 游戏热点以及官方杯赛讨论 MZ Talk'},
         '318': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=318&sport=soccer', 'name': '🇨🇳 Chinese\n      1 新手及疑问解答 Newbie and Q&A'},
-        '19': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=19&sport=soccer', 'name': '🇪🇦 Español(España)\n      ManagerZone habla'},
-        '21': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=21&sport=soccer', 'name': '🇪🇦 Español(España)\n      Preguntas y Respuestas'},
-        '26': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=26&sport=soccer', 'name': '🇵🇱 Polski\n      Rozmowy ManagerZone [MZ Talk]'},
-        '25': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=25&sport=soccer', 'name': '🇵🇱 Polski\n      Pytania i Odpowiedzi [Q&A]'},
         '1': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=1&sport=soccer', 'name': '🇸🇪 Svenska\n      Allmänt om ManagerZone [MZ Talk]'},
         '4': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=4&sport=soccer', 'name': '🇸🇪 Svenska\n      Frågor & Svar [Q&A]'},
+        '26': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=26&sport=soccer', 'name': '🇵🇱 Polski\n      Rozmowy ManagerZone [MZ Talk]'},
+        '25': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=25&sport=soccer', 'name': '🇵🇱 Polski\n      Pytania i Odpowiedzi [Q&A]'},
         '90': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=90&sport=soccer', 'name': '🇹🇷 Türkçe\n      ManagerZone muhabbetleri [MZ Talk]'},
         '91': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=91&sport=soccer', 'name': '🇹🇷 Türkçe\n      Sorular & Cevaplar [Q&A]'},
         '65': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=65&sport=soccer', 'name': '🇷🇴 Romanian\n      Vorbe despre ManagerZone [MZ Talk]'},
         '63': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=63&sport=soccer', 'name': '🇷🇴 Romanian\n      Intrebari si Raspunsuri [Q&A]'},
         '102': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=102&sport=soccer', 'name': '🇮🇹 Italiano\n      Chiacchiere su ManagerZone [MZ Talk]'},
-        '105': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=105&sport=soccer', 'name': '🇮🇹 Italiano\n      Domande e Risposte [Q&A]'}
+        '105': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=105&sport=soccer', 'name': '🇮🇹 Italiano\n      Domande e Risposte [Q&A]'},
+        '19': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=19&sport=soccer', 'name': '🇪🇦 Español(España)\n      ManagerZone habla'},
+        '21': {'url': 'https://www.managerzone.com/?p=forum&sub=topics&forum_id=21&sport=soccer', 'name': '🇪🇦 Español(España)\n      Preguntas y Respuestas'}
+        # ADICIONAR  Estonia e Grecia ???
+
+
+
     }
 
     prev = load_state()
